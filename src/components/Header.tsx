@@ -7,16 +7,16 @@ export default function Header() {
   const { user } = useAuth();
 
   return (
-    <header className='flex justify-between items-stretch bg-neutral-50'>
-      <h1 className='px-2 py-1 text-lg font-semibold'>
-        <Link to="/">
+    <header className='p-1 flex justify-between items-stretch'>
+      <h1 className=''>
+        <Link to="/" className="btn btn-ghost btn-sm text-base">
           Taximate
         </Link>
       </h1>
 
       <Link
         to={user ? "/profile" : "/login"}
-        className="px-2 py-1 flex flex-row items-center gap-1 hover:bg-neutral-200"
+        className="btn btn-sm shadow-sm"
       >
         <FaRegUser />
         {user ? 'Profile' : 'Login'}

@@ -16,3 +16,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+input.placeholder-black::placeholder {
+  color: #000 !important;
+  opacity: 1;
+}
