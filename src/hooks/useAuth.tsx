@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { jwtDecode } from "jwt-decode";
+import { apiFetch } from '../utils/fetch';
+import { useNotifs } from './useNotifs';
 
 export interface User {
   id: number;
@@ -8,12 +9,6 @@ export interface User {
   phone?: string;
   provider: string;
   email: string;
-}
-
-interface JwtPayload {
-  iss: string;
-  iat: number;
-  userId: string;
 }
 
 interface AuthContextType {
@@ -27,32 +22,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: {
   children: React.ReactNode;
 }) => {
+  const { addNotification } = useNotifs();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshAuth = async () => {
+  const refreshAuth = () => {
     const token = window.document.cookie.split(';').find(c => c.startsWith('access-token='))?.split('=')[1] ?? null;
-    
-    if (token) {
-      try {
-        const { data, error } = await fetch(`/api/users/me`)
-          .then((response) => {
-            return response.json();
-          });
-        
-        if (data) {
-          setUser(data);
-        } else {
-          setUser(null);
-        }
 
-        setLoading(false);
-      } catch (error) {
-        setUser(null);
-      }
-    } else {
-      setUser(null);
-      setLoading(false);
+    if (token) {
+      apiFetch("/api/users/me", {
+        addNotification
+      })
+        .then(data => {
+          setUser(data);
+          setLoading(false);
+        });
     }
   };
 

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../hooks/useAuth';
-import { Link } from 'wouter';
+import { useNotifs } from '../hooks/useNotifs';
+import { apiFetch } from '../utils/fetch';
 
 export default function Profile() {
   const { user, loading: authLoading } = useAuth();
+  const { addNotification } = useNotifs();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name ?? '');
   const [gender, setGender] = useState(user?.gender ?? '');
@@ -24,24 +26,20 @@ export default function Profile() {
   const handleSave = () => {
     setLoading(true);
     
-    fetch('/api/users/me', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
+    apiFetch('/api/users/me', {
+      fetchOptions: {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          gender,
+          phone
+        })
       },
-      body: JSON.stringify({
-        name,
-        gender,
-        phone
-      })
+      addNotification
     })
-    .then(res => res.json())
-    .then(({ error }) => {
-      if (error) {
-        console.error(error);
-      }
-    })
-    .catch(() => null)
     .finally(() => {
       setEditing(false);
       setLoading(false)

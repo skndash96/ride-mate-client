@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import { Geocoding } from '../utils/autoComplete';
+import { Geocoding } from '../utils/fetch';
 import { Icon } from 'leaflet';
 
 export default function MapComponent({

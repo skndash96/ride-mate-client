@@ -1,7 +1,9 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { FaSearchLocation } from 'react-icons/fa';
-import { autoComplete, Geocoding } from '../utils/autoComplete';
+import { Geocoding } from '../utils/fetch';
 import { FaXmark } from 'react-icons/fa6';
+import { apiFetch } from '../utils/fetch';
+import { useNotifs } from '../hooks/useNotifs';
 
 export default function LocationInput({
   label,
@@ -16,6 +18,7 @@ export default function LocationInput({
   defaultSuggestions: Geocoding[] | null,
   userLocation: [number, number] | null //lat, lng
 }) {
+  const { addNotification } = useNotifs();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [suggestions, setSuggestions] = useState<Geocoding[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,23 +35,23 @@ export default function LocationInput({
     setLoading(true);
 
     inputTimeout.current = setTimeout(() => {
-      autoComplete(e.target.value, userLocation)
+      const q = new URLSearchParams();
+
+      q.set("q", e.target.value);
+      if (userLocation) q.set("point", `${userLocation[0]},${userLocation[1]}`);
+
+      apiFetch("/api/geocoding/autocomplete?" + q.toString(), {
+        addNotification
+      })
         .then((data) => {
           setSuggestions(data);
-        }).catch((err) => {
-          setSuggestions(null);
-          console.error(err);
-        })
-        .finally(() => {
           setLoading(false);
-        });
-
+        })
     }, 500);
   };
 
   const handleClick = (suggestion: Geocoding) => {
     inputRef.current?.blur();
-    console.log(suggestion);
     setLocation(suggestion);
   };
 
@@ -59,9 +62,9 @@ export default function LocationInput({
       </h1>
 
       {location ? (
-        <div className='h-auto gap-2 padding-1 border border-[#1f293733] border-solid'>
+        <div className='h-auto gap-2 padding-1 border border-[#1f293733] border-solid rounded-lg'>
           <button
-            className='mx-1 translate-y-1 btn btn-xs btn-ghost btn-square'
+            className='mx-1 translate-y-[2px] btn btn-xs btn-ghost btn-square'
             onClick={() => setLocation(null)}
           >
             <FaXmark size={16} />
