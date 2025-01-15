@@ -1,5 +1,4 @@
-/** @type {import('tailwindcss').Config} */
-export default {
+const config = {
   content: [
     "./src/**/*.{html,js,ts,jsx,tsx}",
     "./index.html"
@@ -12,3 +11,4 @@ export default {
   ],
 }
 
+export default config

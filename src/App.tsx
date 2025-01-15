@@ -6,6 +6,7 @@ import { AuthProvider } from './hooks/useAuth'
 import Login from './views/Login'
 import Profile from './views/Profile'
 import NotFound from './views/404'
+import NewRide from './views/NewRide'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" component={Home} />
           <Route path="/login" component={Login} />
           <Route path="/profile" component={Profile} />
+          <Route path="/new" component={NewRide} />
           <Route component={NotFound} />
         </Switch>
       </div>
