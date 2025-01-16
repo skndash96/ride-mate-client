@@ -30,13 +30,15 @@ export const AuthProvider = ({ children }: {
     const token = window.document.cookie.split(';').find(c => c.startsWith('access-token='))?.split('=')[1] ?? null;
 
     if (token) {
-      apiFetch("/api/users/me", {
+      apiFetch<User>("/api/users/me", {
         addNotification
       })
         .then(data => {
           setUser(data);
           setLoading(false);
         });
+    } else {
+      setLoading(false);
     }
   };
 

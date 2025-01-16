@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth } from '../hooks/useAuth';
+import { useAuth, User } from '../hooks/useAuth';
 import { useNotifs } from '../hooks/useNotifs';
 import { apiFetch } from '../utils/fetch';
 
@@ -26,7 +26,7 @@ export default function Profile() {
   const handleSave = () => {
     setLoading(true);
     
-    apiFetch('/api/users/me', {
+    apiFetch<User>('/api/users/me', {
       fetchOptions: {
         method: 'PATCH',
         headers: {

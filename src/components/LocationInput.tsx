@@ -40,7 +40,7 @@ export default function LocationInput({
       q.set("q", e.target.value);
       if (userLocation) q.set("point", `${userLocation[0]},${userLocation[1]}`);
 
-      apiFetch("/api/geocoding/autocomplete?" + q.toString(), {
+      apiFetch<Geocoding[]>("/api/geocoding/autocomplete?" + q.toString(), {
         addNotification
       })
         .then((data) => {

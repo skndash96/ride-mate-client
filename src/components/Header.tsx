@@ -5,15 +5,16 @@ import { FaRegUser } from 'react-icons/fa';
 
 export default function Header() {
   const auth = useAuth();
-  const [location, setLocation] = useLocation();
+  const [path, setPath] = useLocation();
 
   useEffect(() => {
     if (auth.loading) return;
 
-    if (!auth.user && location !== '/login') setLocation("/login");
-      
-  }, [auth, location]);
-  
+    if (!auth.user && path !== '/login') {
+      setPath("/login");
+    }
+  }, [auth, path]);
+
   return (
     <header className='p-1 flex justify-between items-stretch'>
       <h1 className=''>

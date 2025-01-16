@@ -5,9 +5,13 @@ import { Geocoding } from '../utils/fetch';
 import { FaLocationDot, FaTableList } from 'react-icons/fa6';
 import { apiFetch } from '../utils/fetch';
 import { useNotifs } from '../hooks/useNotifs';
+import { useRide } from '../hooks/useRide';
+import { useLocation } from 'wouter';
 
 export default function NewRide() {
   const { addNotification } = useNotifs();
+  const { currentRide, refreshRide } = useRide();
+  const [path, setPath] = useLocation();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pickup, setPickup] = useState<Geocoding | null>(null);
   const [drop, setDrop] = useState<Geocoding | null>(null);
@@ -15,10 +19,16 @@ export default function NewRide() {
 
   const [peopleCnt, setPeopleCnt] = useState('');
   const [femaleCnt, setFemaleCnt] = useState('');
-  const [departureTime, setDepartureTime] = useState<Date | null>(null);
+  const [departureTime, setDepartureTime] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (currentRide === null) return;
+
+    setPath("/rides");
+  }, [currentRide]);
 
   useEffect(() => {
     if (userLocation === null) return;
@@ -29,7 +39,7 @@ export default function NewRide() {
     q.set('point', `${userLocation[0]},${userLocation[1]}`);
     q.set('osm_tag', 'amenity');
 
-    apiFetch("/api/geocoding/autocomplete?" + q.toString(), {
+    apiFetch<Geocoding[]>("/api/geocoding/autocomplete?" + q.toString(), {
       addNotification
     })
       .then((data) => setDefaultSuggestions(data));
@@ -72,10 +82,8 @@ export default function NewRide() {
       || _femaleCnt > _peopleCnt
     ) {
       addNotification('Invalid number of peopleCnt and femaleCnt.', 'error');
-    } else if (
-      departureTime === null
-    ) {
-      addNotification('Please provide a valid departure time.', 'error');
+    } else if (departureTime === null) {
+      addNotification('Please provide valid departure time.', 'error');
     } else {
       apiFetch('/api/rides', {
         fetchOptions: {
@@ -84,24 +92,19 @@ export default function NewRide() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            pickup: [drop.point.lat, drop.point.lng],
-            drop: [drop.point.lat, drop.point.lng],
+            stops: [pickup, drop].map(loc => ({
+              name: `${loc.name} ${loc.street && ', ' + loc.street} ${loc.city && ', ' + loc.city}`,
+              point: loc.point,
+            })),
             peopleCnt: _peopleCnt,
             femaleCnt: _femaleCnt,
-            departureTime: departureTime.toISOString()
+            departureTime: new Date(departureTime).toISOString()
           })
         },
         addNotification
       })
         .then(() => {
-          setPickup(null);
-          setDrop(null);
-          setPeopleCnt('');
-          setFemaleCnt('');
-          setDepartureTime(null);
-          setPage(1);
-          setLoading(false);
-          //TODO: Redirect to rides page
+          refreshRide();
         });
     }
   };
@@ -178,8 +181,7 @@ export default function NewRide() {
             </label>
 
             <input
-              value={departureTime?.toISOString().slice(0, 16)}
-              onChange={(e) => setDepartureTime(new Date(e.target.value))}
+              onChange={(e) => setDepartureTime(e.target.value)}
               type='datetime-local'
               className='input input-bordered input-sm'
             />
@@ -241,7 +243,7 @@ export default function NewRide() {
               </p>
 
               <p className='text-sm'>
-                Departure Time: {departureTime?.toISOString().slice(0, 16)}
+                Departure Time: {departureTime}
               </p>
             </div>
           </div>

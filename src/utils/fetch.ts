@@ -6,13 +6,13 @@ export type Geocoding = {
   [key: string]: any
 };
 
-export const apiFetch = async (url: string, {
+export const apiFetch = async <T>(url: string, {
   fetchOptions,
   addNotification
 }: {
   fetchOptions?: RequestInit,
   addNotification?: (message: string, type: "error" | "success") => void
-}) => {
+}): Promise<T | null> => {
   try {
     const { data, error } = await fetch(url, fetchOptions).then(res => res.json());
 
