@@ -14,6 +14,7 @@ export interface Ride {
     lat: number;
     lng: number;
   }[];
+  status: string;
 };
 
 export interface RideContextType {

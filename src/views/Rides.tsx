@@ -1,23 +1,31 @@
 import React, { useEffect, useState } from 'react'
-import { useRide } from '../hooks/useRide';
-import { useLocation } from 'wouter';
-import { FaLocationDot } from 'react-icons/fa6';
+import { Ride, useRide } from '../hooks/useRide';
+import { Redirect, useLocation } from 'wouter';
+import { FaFilter, FaLocationDot } from 'react-icons/fa6';
 import { apiFetch } from '../utils/fetch';
+import RideComponent from '../components/Ride';
+import { useNotifs } from '../hooks/useNotifs';
 
 export default function Rides() {
   const { currentRide, refreshRide } = useRide();
-  const [href, setHref] = useLocation();
+  const { addNotification } = useNotifs();
+  const [suggestedRides, setSuggestedRides] = useState<Ride[]>([]);
+  const [path, setPath] = useLocation();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (currentRide === null) {
-      setHref("/new");
+      setPath("/new");
+      return;
     };
-  }, [currentRide]);
 
-  if (currentRide === null) {
-    return null;
-  }
+    apiFetch<Ride[]>("/api/rides/suggestions", {
+      addNotification
+    })
+      .then(rides => {
+        setSuggestedRides(rides ?? []);
+      });
+  }, [currentRide]);
 
   const handleCancel = () => {
     if (window.confirm && !window.confirm("Are you sure you want to cancel this ride?")) return;
@@ -29,49 +37,52 @@ export default function Rides() {
         method: "DELETE"
       }
     })
-    .then(() => {
-      refreshRide();
-      setLoading(false);
-    });
+      .then(() => {
+        refreshRide();
+        setLoading(false);
+      });
   };
 
   return (
     <div className='p-4'>
-      <div className='collapse collapse-arrow'>
-        <input type="checkbox" name="current-ride" />
-        <p className='collapse-title bg-neutral-200 border-b border-solid border-neutral-400'>
-          Current Ride
-        </p>
-        <div className='p-2 collapse-content bg-neutral-200'>
-          <div className='text-sm grid grid-cols-[5rem_1fr] gap-2'>
-            <strong className='mr-2'>Pickup:</strong>
-            <span>
-              <FaLocationDot className='opacity-75 mr-2 inline' />
-              {currentRide.stops[0].name}
-            </span>
-            <strong className='mr-2'>Drop:</strong>
-            <span>
-              <FaLocationDot className='opacity-75 mr-2 inline' />
-              {currentRide.stops[1].name}
-            </span>
-            <strong className='mr-2'>People:</strong>
-            <span>
-              {currentRide.peopleCnt} ({currentRide.peopleCnt - currentRide.femaleCnt} M, {currentRide.femaleCnt} F)
-            </span>
-            <strong className='mr-2'>Time:</strong>
-            <span>
-              {new Date(currentRide.depTime).toDateString()}, {new Date(currentRide.depTime).toLocaleTimeString()}
-            </span>
-          </div>
+      {currentRide && (
+        <div className='collapse collapse-arrow'>
+          <input className='min-h-0 peer' type="checkbox" name="current-ride" />
 
-          <button onClick={handleCancel} className='mt-4 btn btn-sm btn-error text-white'>
-            {loading && (
-              <div className='loading loading-spinner loading-sm' />
-            )}
-            Cancel Ride
-          </button>
+          <p className='min-h-0 p-0 pl-4 py-1 collapse-title after:top-[16px_!important] bg-neutral-200 peer-checked:rounded-none rounded-xl'>
+            Current Ride
+          </p>
+
+          <div className='peer-checked:p-2 collapse-content bg-neutral-200'>
+            <RideComponent ride={currentRide} />
+
+            <button onClick={handleCancel} className='mt-4 btn btn-sm btn-error text-white'>
+              {loading && (
+                <div className='loading loading-spinner loading-sm' />
+              )}
+              Cancel Ride
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      <button className='mt-4 btn btn-sm'>
+        <FaFilter />
+      </button>
+
+      <ul className='mt-4 flex flex-col gap-4'>
+        {suggestedRides.length === 0 && (
+          <div className='w-fit mx-auto grid place-items-center gap-4'>
+            <FaLocationDot size={50} className='text-2xl text-neutral-500' />
+            <p className='text-neutral-500'>No suggested rides available</p>
+          </div>
+        )}
+        {suggestedRides.map(ride => (
+          <li key={ride.id}>
+            <RideComponent ride={ride} />
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

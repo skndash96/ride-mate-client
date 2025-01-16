@@ -4,7 +4,7 @@ import Home from './views/Home'
 import Header from './components/Header'
 import { AuthProvider } from './hooks/useAuth'
 import Login from './views/Login'
-import Profile from './views/Profile'
+import Profile from './views/Profile/Home'
 import NotFound from './views/404'
 import NewRide from './views/NewRide'
 import { NotifProvider } from './hooks/useNotifs'
@@ -21,7 +21,7 @@ function App() {
             <Switch>
               <Route path="/" component={Home} />
               <Route path="/login" component={Login} />
-              <Route path="/profile" component={Profile} />
+              <Route path="/profile/*?" component={Profile} />
               <Route path="/new" component={NewRide} />
               <Route path="/rides" component={Rides} />
               <Route component={NotFound} />
