@@ -96,7 +96,7 @@ export default function LocationInput({
             ) :
               (suggestions ?? defaultSuggestions).map((suggestion: any) => (
                 <li key={suggestion.osm_id}>
-                  <button className='py-1 h-auto btn btn-sm btn-ghost font-medium justify-start hover:bg-neutral-400' onClick={() => handleClick(suggestion)}>
+                  <button className='py-1 h-auto btn btn-sm btn-ghost font-medium justify-start hover:bg-neutral-400 text-left' onClick={() => handleClick(suggestion)}>
                     {suggestion.name} {suggestion.street && ', ' + suggestion.street} {suggestion.city && ', ' + suggestion.city}
                   </button>
                 </li>

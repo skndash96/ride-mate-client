@@ -1,30 +1,44 @@
 import React, { useEffect } from 'react'
-import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
-import { Geocoding } from '../utils/fetch';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Icon } from 'leaflet';
+
+interface MarkerType {
+  label: string,
+  lat: number,
+  lng: number
+}
+
+const MapBounds = ({
+  userLocation,
+  markers
+}: {
+  userLocation: [number, number],
+  markers: MarkerType[]
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+
+    map.fitBounds([
+      userLocation,
+      ...markers.map(({ lat, lng }) => [lat, lng]) as [number, number][],
+    ], {
+      padding: [20, 20]
+    });
+  }, [map, markers]);
+
+  return null;
+};
 
 export default function MapComponent({
   userLocation,
-  pickup,
-  drop,
+  markers
 }: {
   userLocation: [number, number] //lat,lng
-  pickup: Geocoding | null
-  drop: Geocoding | null
+  markers: MarkerType[]
 }) {
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    link.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY='
-    link.crossOrigin = '';
-    document.head.appendChild(link);
-
-    return () => {
-      document.head.removeChild(link);
-    }
-  }, []);
-
   return (
     <MapContainer
       className='w-full h-full'
@@ -36,30 +50,27 @@ export default function MapComponent({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+
+      <MapBounds userLocation={userLocation} markers={markers} />
+
+      {markers.map(marker => (
+        <Marker key={marker.label} position={[marker.lat, marker.lng]}>
+          <Popup>
+            {marker.label}
+          </Popup>
+        </Marker>
+      ))}
+
       <Marker icon={new Icon({
         iconUrl: "pin.png",
-        iconSize: [50,50],
-        iconAnchor: [30,45],
+        iconSize: [50, 50],
+        iconAnchor: [30, 45],
         popupAnchor: [0, -45]
       })} position={userLocation}>
         <Popup>
           Your Location
         </Popup>
       </Marker>
-      {pickup && (
-        <Marker position={[pickup.point.lat, pickup.point.lng]}>
-          <Popup>
-            Pickup Location
-          </Popup>
-        </Marker>
-      )}
-      {drop && (
-        <Marker position={[drop.point.lat, drop.point.lng]}>
-          <Popup>
-            Drop Location
-          </Popup>
-        </Marker>
-      )}
     </MapContainer>
   );
 }

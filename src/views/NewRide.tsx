@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import MapComponent from '../components/Map'
 import LocationInput from '../components/LocationInput';
 import { Geocoding } from '../utils/fetch';
@@ -16,9 +16,30 @@ export default function NewRide() {
   const [pickup, setPickup] = useState<Geocoding | null>(null);
   const [drop, setDrop] = useState<Geocoding | null>(null);
   const [defaultSuggestions, setDefaultSuggestions] = useState<Geocoding[] | null>(null);
+  const markers = useMemo(() => {
+    const newMarkers = [];
+    if (pickup) {
+      newMarkers.push({
+        label: 'pickup',
+        lat: pickup.point.lat,
+        lng: pickup.point.lng
+      });
+    }
+
+    if (drop) {
+      newMarkers.push({
+        label: 'drop',
+        lat: drop.point.lat,
+        lng: drop.point.lng
+      });
+    }
+
+    return newMarkers;
+  }, [pickup, drop]);
 
   const [peopleCnt, setPeopleCnt] = useState('');
   const [femaleCnt, setFemaleCnt] = useState('');
+  const [reqCnt, setReqCnt] = useState('');
   const [departureTime, setDepartureTime] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
@@ -27,7 +48,7 @@ export default function NewRide() {
   useEffect(() => {
     if (currentRide === null) return;
 
-    setPath("/rides");
+    setPath("/suggestions");
   }, [currentRide]);
 
   useEffect(() => {
@@ -61,10 +82,11 @@ export default function NewRide() {
   }, []);
 
   const handleAdd = () => {
-    setLoading(true);
+    setLoading(false);
 
     const _peopleCnt = parseInt(peopleCnt);
     const _femaleCnt = parseInt(femaleCnt);
+    const _reqCnt = parseInt(reqCnt);
 
     if (
       pickup === null ||
@@ -82,9 +104,17 @@ export default function NewRide() {
       || _femaleCnt > _peopleCnt
     ) {
       addNotification('Invalid number of peopleCnt and femaleCnt.', 'error');
-    } else if (departureTime === null) {
+    } else if (
+      isNaN(_reqCnt)
+      || _reqCnt < 0
+      || _reqCnt <= _peopleCnt
+    ) {
+      addNotification('Invalid number of people requested.', 'error');
+    } else if (departureTime === null || new Date(departureTime).getTime() < Date.now()) {
       addNotification('Please provide valid departure time.', 'error');
     } else {
+      setLoading(true);
+
       apiFetch('/api/rides', {
         fetchOptions: {
           method: 'POST',
@@ -98,12 +128,14 @@ export default function NewRide() {
             })),
             peopleCnt: _peopleCnt,
             femaleCnt: _femaleCnt,
+            reqCnt: _reqCnt,
             departureTime: new Date(departureTime).toISOString()
           })
         },
         addNotification
       })
         .then(() => {
+          setLoading(false);
           refreshRide();
         });
     }
@@ -114,7 +146,7 @@ export default function NewRide() {
       {page === 1 && (
         <div className='p-4 mb-8 w-full max-w-sm mx-auto flex flex-col gap-2'>
           <h1 className='text-lg font-semibold'>
-            Give us your ride location
+            Ride Details
           </h1>
 
           <div>
@@ -148,42 +180,58 @@ export default function NewRide() {
       )}
 
       {page === 2 && (
-        <div className='p-4 w-full max-w-sm mx-auto flex flex-col gap-4'>
+        <div className='p-4 w-full max-w-sm mx-auto flex flex-col gap-8'>
           <h1 className='text-lg font-semibold'>
-            Give us your ride details
+            Ride Details
           </h1>
 
           <div className='w-full flex flex-col gap-2'>
             <label className='text-sm'>
-              How many of you are riding? Include yourself.
+              How many of you are riding?
             </label>
-            <div className='grid sm:grid-cols-9 gap-2'>
+
+            <div className='grid grid-cols-2 gap-2'>
               <input
                 type='text'
                 value={peopleCnt}
                 onChange={(e) => setPeopleCnt(e.target.value)}
-                className='shrink col-span-5 inline input input-sm input-bordered'
-                placeholder='Total (including you)'
+                className='inline input input-sm input-bordered'
+                placeholder='total'
               />
               <input
                 type='text'
                 value={femaleCnt}
                 onChange={(e) => setFemaleCnt(e.target.value)}
-                className='shrink col-span-4 inline input input-sm input-bordered'
-                placeholder='Total femaleCnt'
+                className='inline input input-sm input-bordered'
+                placeholder='females'
               />
             </div>
           </div>
 
           <div className='flex flex-col gap-2'>
             <label className='text-sm'>
-              Departure Time:
+              How many people are you looking for? <i>Include yourself</i>
+            </label>
+
+            <input
+              value={reqCnt}
+              onChange={(e) => setReqCnt(e.target.value)}
+              type='text'
+              className='input input-bordered input-sm'
+              placeholder='people required'
+            />
+          </div>
+
+          <div className='flex flex-col gap-2'>
+            <label className='text-sm'>
+              Departure Date and Time:
             </label>
 
             <input
               onChange={(e) => setDepartureTime(e.target.value)}
               type='datetime-local'
               className='input input-bordered input-sm'
+              placeholder='Departure Date and Time'
             />
           </div>
 
@@ -242,7 +290,11 @@ export default function NewRide() {
                 {peopleCnt} {peopleCnt === "1" ? "person" : "people"}, ({parseInt(peopleCnt) - parseInt(femaleCnt)} M, {femaleCnt} F)
               </p>
 
-              <p className='text-sm'>
+              <p className='mt-2 text-sm'>
+                Looking for {parseInt(reqCnt) - parseInt(peopleCnt)} more people
+              </p>
+
+              <p className='mt-2 text-sm'>
                 Departure Time: {departureTime}
               </p>
             </div>
@@ -274,8 +326,7 @@ export default function NewRide() {
           ) : (
             <MapComponent
               userLocation={userLocation}
-              pickup={pickup}
-              drop={drop}
+              markers={markers}
             />
           )}
         </div>

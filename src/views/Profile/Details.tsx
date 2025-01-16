@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { User } from '../../hooks/useAuth';
+import { useAuth, User } from '../../hooks/useAuth';
 import { Ride } from '../../hooks/useRide';
 import { apiFetch } from '../../utils/fetch';
 import { useNotifs } from '../../hooks/useNotifs';
 
-export default function Details({
-  user
-}: {
-  user: User,
-}) {
+export default function Details() {
+  const { user } = useAuth();
   const { addNotification } = useNotifs();
 
   const [name, setName] = useState(user?.name ?? '');
@@ -17,16 +14,16 @@ export default function Details({
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
 
+  useEffect(() => {
+    handleCancel();
+  }, [user]);
+
   const handleCancel = () => {
     setEditing(false);
     setName(user?.name ?? '');
     setGender(user?.gender ?? '');
     setPhone(user?.phone ?? '');
   };
-
-  useEffect(() => {
-    handleCancel();
-  }, [user]);
 
   const handleSave = () => {
     setLoading(true);
@@ -57,7 +54,7 @@ export default function Details({
         <label className='inline-block label text-sm' htmlFor="name" >
           Name:
         </label>
-        < input
+        <input
           name='name'
           className="shrink-1 input input-bordered shadow-sm input-sm disabled:hover:cursor-default disabled:text-neutral-900"
           value={name}
@@ -66,11 +63,11 @@ export default function Details({
         />
       </div>
 
-      < div className='flex flex-col' >
+      <div className='flex flex-col' >
         <label className='inline-block label text-sm' htmlFor="gender" >
           Gender:
         </label>
-        < select
+        <select
           name="gender"
           value={gender}
           onChange={e => setGender(e.currentTarget.value)}
@@ -80,23 +77,23 @@ export default function Details({
           <option value="" >
             Select
           </option>
-          < option value="MALE" >
+          <option value="MALE" >
             Male
           </option>
-          < option value="FEMALE" >
+          <option value="FEMALE" >
             Female
           </option>
-          < option value="OTHERS" >
+          <option value="OTHERS" >
             Others
           </option>
         </select>
       </div>
 
-      < div className='flex flex-col' >
+      <div className='flex flex-col' >
         <label className='inline-block label text-sm' htmlFor="phone" >
           Phone Number:
         </label>
-        < input
+        <input
           name='phone'
           value={phone}
           onChange={e => setPhone(e.target.value)}

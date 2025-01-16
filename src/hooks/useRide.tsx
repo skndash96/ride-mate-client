@@ -9,6 +9,7 @@ export interface Ride {
   depTime: Date;
   peopleCnt: number;
   femaleCnt: number;
+  reqCnt: number;
   stops: {
     name: string;
     lat: number;
