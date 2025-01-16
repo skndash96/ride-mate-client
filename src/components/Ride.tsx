@@ -23,8 +23,9 @@ export default function RideComponent({
       <span>
         {ride.peopleCnt} ({ride.peopleCnt - ride.femaleCnt} M, {ride.femaleCnt} F)
       </span>
+      <strong> Need </strong>
       <span>
-        Looking for {ride.reqCnt - ride.peopleCnt} more people
+        {ride.reqCnt - ride.peopleCnt} more people
       </span>
       <strong className='mr-2'>Time:</strong>
       <span>
