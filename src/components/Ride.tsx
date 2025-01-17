@@ -1,6 +1,6 @@
 import React from 'react'
-import { Ride } from '../hooks/useRide'
 import { FaLocationDot } from 'react-icons/fa6'
+import { Ride } from '../types'
 
 export default function RideComponent({
   ride
@@ -8,7 +8,7 @@ export default function RideComponent({
   ride: Ride
 }) {
   return (
-    <div className='p-2 bg-neutral-100 rounded-lg shadow-md text-sm grid grid-cols-[5rem_1fr] gap-2'>
+    <div className='text-sm grid grid-cols-[5rem_1fr] gap-2'>
       <strong className='mr-2'>Pickup:</strong>
       <span>
         <FaLocationDot className='opacity-75 mr-2 inline' />

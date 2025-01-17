@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import MapComponent from '../components/Map'
 import LocationInput from '../components/LocationInput';
-import { Geocoding } from '../utils/fetch';
 import { FaLocationDot, FaTableList } from 'react-icons/fa6';
 import { apiFetch } from '../utils/fetch';
 import { useNotifs } from '../hooks/useNotifs';
 import { useRide } from '../hooks/useRide';
+import { Geocoding } from '../types';
+import { useUserLocation } from '../hooks/useUserLocation';
 import { useLocation } from 'wouter';
 
 export default function NewRide() {
   const { addNotification } = useNotifs();
   const { currentRide, refreshRide } = useRide();
   const [path, setPath] = useLocation();
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [pickup, setPickup] = useState<Geocoding | null>(null);
+  const userLocation = useUserLocation();
   const [drop, setDrop] = useState<Geocoding | null>(null);
   const [defaultSuggestions, setDefaultSuggestions] = useState<Geocoding[] | null>(null);
   const markers = useMemo(() => {
@@ -63,23 +64,8 @@ export default function NewRide() {
     apiFetch<Geocoding[]>("/api/geocoding/autocomplete?" + q.toString(), {
       addNotification
     })
-      .then((data) => setDefaultSuggestions(data));
+      .then((data) => setDefaultSuggestions(data || null));
   }, [userLocation]);
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setUserLocation([
-        position.coords.latitude,
-        position.coords.longitude,
-      ]);
-
-      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
-        if (result.state === 'denied') {
-          alert('Please enable location services for easy usage.');
-        }
-      });
-    });
-  }, []);
 
   const handleAdd = () => {
     setLoading(false);

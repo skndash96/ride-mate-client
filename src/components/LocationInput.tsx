@@ -1,9 +1,9 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { FaSearchLocation } from 'react-icons/fa';
-import { Geocoding } from '../utils/fetch';
 import { FaXmark } from 'react-icons/fa6';
 import { apiFetch } from '../utils/fetch';
 import { useNotifs } from '../hooks/useNotifs';
+import { Geocoding } from '../types';
 
 export default function LocationInput({
   label,

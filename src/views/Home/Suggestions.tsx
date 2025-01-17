@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from 'react'
-import { Ride, useRide } from '../../hooks/useRide';
+import { useRide } from '../../hooks/useRide';
 import { FaFilter, FaLocationDot } from 'react-icons/fa6';
 import { apiFetch } from '../../utils/fetch';
-import RideComponent from '../../components/Ride';
 import { useNotifs } from '../../hooks/useNotifs';
-import NoCurrentRide from '../../components/NoCurrentRide';
+import { Ride } from '../../types';
+import Suggestion from '../../components/Suggestion';
 
 export default function Suggestions() {
   const { addNotification } = useNotifs();
   const { currentRide, refreshRide } = useRide();
   const [suggestedRides, setSuggestedRides] = useState<Ride[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const getSuggestions = () => {
+    setLoading(true);
+
+    apiFetch<Ride[]>("/api/rides/suggestions", {
+      addNotification
+    })
+      .then(rides => {
+        setLoading(false);
+        setSuggestedRides(rides || []);
+      });
+  };
 
   useEffect(() => {
     if (currentRide === null) {
@@ -17,20 +30,9 @@ export default function Suggestions() {
       return;
     };
 
-    apiFetch<Ride[]>("/api/rides/suggestions", {
-      addNotification
-    })
-      .then(rides => {
-        setSuggestedRides(rides ?? []);
-      });
+    getSuggestions();
   }, [currentRide]);
 
-  if (currentRide === null) {
-    return (
-      <NoCurrentRide />
-    );
-  }
-  
   return (
     <div className='p-4'>
       <button className='btn btn-sm'>
@@ -39,6 +41,9 @@ export default function Suggestions() {
       </button>
 
       <ul className='mt-4 flex flex-col gap-4'>
+        {loading && (
+          <div className='loading loading-spinner loading-lg' />
+        )}
         {suggestedRides.length === 0 && (
           <div className='w-fit mx-auto grid place-items-center gap-4'>
             <FaLocationDot size={50} className='text-2xl text-neutral-500' />
@@ -48,7 +53,7 @@ export default function Suggestions() {
         
         {suggestedRides.map(ride => (
           <li key={ride.id}>
-            <RideComponent ride={ride} />
+            <Suggestion ride={ride} refresh={getSuggestions} />
           </li>
         ))}
       </ul>

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useAuth, User } from '../../hooks/useAuth';
-import { Ride } from '../../hooks/useRide';
+import { useAuth } from '../../hooks/useAuth';
 import { apiFetch } from '../../utils/fetch';
 import { useNotifs } from '../../hooks/useNotifs';
+import { User } from '../../types';
 
 export default function Details() {
   const { user } = useAuth();
@@ -42,7 +42,9 @@ export default function Details() {
       },
       addNotification
     })
-      .finally(() => {
+      .then(res => {
+        if (res === false) return;
+        
         setEditing(false);
         setLoading(false);
       });

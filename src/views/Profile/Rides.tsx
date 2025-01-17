@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Ride } from '../../hooks/useRide';
 import { apiFetch } from '../../utils/fetch';
 import { useNotifs } from '../../hooks/useNotifs';
 import RideComponent from '../../components/Ride';
 import { useAuth } from '../../hooks/useAuth';
 import { FaCarCrash } from 'react-icons/fa';
+import { Ride } from '../../types';
 
 export default function UserRides() {
   const { user, loading: authLoading } = useAuth();
@@ -22,7 +22,7 @@ export default function UserRides() {
       addNotification
     })
       .then(rides => {
-        setRides(rides ?? []);
+        setRides(rides || []);
         setLoading(false);
       });
   }, [authLoading]);

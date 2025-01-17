@@ -1,11 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { FaXmark } from 'react-icons/fa6';
-
-interface Notification {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
-}
+import { Notification } from '../types';
 
 interface NotifContextType {
   notifications: Notification[];
@@ -35,6 +30,10 @@ export const NotifProvider = ({ children }: { children: ReactNode }) => {
     };
     
     setNotifications((prevNotifs) => [...prevNotifs, newNotification]);
+
+    setTimeout(() => {
+      removeNotification(newNotification.id);
+    }, 5000);
   };
 
   const removeNotification = (id: number) => {

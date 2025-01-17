@@ -9,25 +9,28 @@ import NotFound from './views/404'
 import NewRide from './views/NewRide'
 import { NotifProvider } from './hooks/useNotifs'
 import { RideProvider } from './hooks/useRide'
+import { UserLocationProvider } from './hooks/useUserLocation'
 
 function App() {
   return (
     <NotifProvider>
-      <AuthProvider>
-        <RideProvider>
-          <div id="wrapper" className='flex flex-col min-h-screen'>
-            <Header />
+      <UserLocationProvider>
+        <AuthProvider>
+          <RideProvider>
+            <div id="wrapper" className='flex flex-col min-h-screen'>
+              <Header />
 
-            <Switch>
-              <Route path="/login" component={Login} />
-              <Route path="/new" component={NewRide} />
-              <Route path="/profile/*?" component={Profile} />
-              <Route path="/*?" component={Home} />
-              <Route component={NotFound} />
-            </Switch>
-          </div>
-        </RideProvider>
-      </AuthProvider>
+              <Switch>
+                <Route path="/login" component={Login} />
+                <Route path="/new" component={NewRide} />
+                <Route path="/profile/*?" component={Profile} />
+                <Route path="/*?" component={Home} />
+                <Route component={NotFound} />
+              </Switch>
+            </div>
+          </RideProvider>
+        </AuthProvider>
+      </UserLocationProvider>
     </NotifProvider>
   );
 }

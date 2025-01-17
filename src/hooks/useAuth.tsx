@@ -1,15 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiFetch } from '../utils/fetch';
 import { useNotifs } from './useNotifs';
-
-export interface User {
-  id: number;
-  name?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHERS' | null;
-  phone?: string;
-  provider: string;
-  email: string;
-}
+import { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -34,7 +26,7 @@ export const AuthProvider = ({ children }: {
         addNotification
       })
         .then(data => {
-          setUser(data);
+          setUser(data || null);
           setLoading(false);
         });
     } else {

@@ -5,7 +5,7 @@ import { Link, Redirect, Route, Switch, useLocation } from 'wouter';
 import Details from './Details';
 import UserRides from './Rides';
 import { apiFetch } from '../../utils/fetch';
-import { Ride } from '../../hooks/useRide';
+import { Ride } from '../../types';
 import { useNotifs } from '../../hooks/useNotifs';
 import { FaUserCircle } from 'react-icons/fa';
 
@@ -21,7 +21,7 @@ export default function Profile() {
       apiFetch<Ride[]>('/api/rides', {
         addNotification
       })
-        .then(rides => setRides(rides ?? []))
+        .then(rides => setRides(rides || []))
     } else {
       setRides([]);
     }

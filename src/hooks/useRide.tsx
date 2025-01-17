@@ -3,20 +3,7 @@ import { createContext, useState } from "react";
 import { useAuth } from "./useAuth";
 import { apiFetch } from "../utils/fetch";
 import { useNotifs } from "./useNotifs";
-
-export interface Ride {
-  id: number;
-  depTime: Date;
-  peopleCnt: number;
-  femaleCnt: number;
-  reqCnt: number;
-  stops: {
-    name: string;
-    lat: number;
-    lng: number;
-  }[];
-  status: string;
-};
+import { Ride } from "../types";
 
 export interface RideContextType {
   currentRide: Ride | null;
@@ -51,7 +38,7 @@ export const RideProvider = ({
       addNotification
     })
     .then(ride => {
-      setCurrentRide(ride);
+      setCurrentRide(ride || null);
       setLoading(false);
     });
   };
